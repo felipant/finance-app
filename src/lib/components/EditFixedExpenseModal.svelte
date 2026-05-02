@@ -4,29 +4,23 @@
 	let { gasto, onclose, onsave, onnotification } = $props();
 	
 	let formData = $state({
-		data_compra: '',
 		valor: '',
-		parcelas: '',
-		tipo: '',
-		pagamento: '',
-		comentario: '',
-		item: ''
+		item: '',
+		tipo: 'variável',
+		comentario: ''
 	});
 	
 	let items = $state([]);
-	//let filteredItems = $state([]);
+	let selectedItem = $state(null);
 	
 	// Initialize form with gasto data
 	$effect(() => {
 		if (gasto) {
 			formData = {
-				data_compra: gasto.data_compra || '',
 				valor: gasto.valor || '',
-				parcelas: gasto.parcelas || '1',
+				item: gasto.item || '',
 				tipo: gasto.tipo || 'variável',
-				pagamento: gasto.pagamento || 'Credito',
-				comentario: gasto.comentario || '',
-				item: gasto.item || ''
+				comentario: gasto.comentario || ''
 			};
 		}
 	});
@@ -51,19 +45,23 @@
 	});
 	
 	function selectItem(item) {
+		selectedItem = item;
 		formData.item = item.nome_item;
 		filteredItems = [];
 	}
 	
 	async function handleSave() {
-		if (!formData.item || !formData.valor || !formData.data_compra) {
+		if (!formData.item || !formData.valor) {
 			onnotification('Preencha todos os campos obrigatórios', 'error');
 			return;
 		}
 		
 		const updatedGasto = {
 			...gasto,
-			...formData
+			...formData,
+			valor: parseFloat(formData.valor),
+			categoria: selectedItem?.nome_categoria || gasto.categoria,
+			subcategoria: selectedItem?.nome_subcategoria || gasto.subcategoria
 		};
 		
 		await onsave(updatedGasto);
@@ -85,7 +83,7 @@
 <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
 	<div class="bg-slate-900 border border-slate-700 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
 		<div class="flex items-center justify-between p-6 border-b border-slate-700">
-			<h2 class="text-2xl font-bold text-white">Editar Gasto</h2>
+			<h2 class="text-2xl font-bold text-white">Editar Gasto Fixo</h2>
 			<button
 				onclick={onclose}
 				class="p-2 hover:bg-slate-800 rounded-lg transition-colors"
@@ -96,16 +94,6 @@
 		
 		<div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div>
-					<label class="block text-sm font-medium text-slate-300 mb-1">Data</label>
-					<input
-						type="date"
-						bind:value={formData.data_compra}
-						class="input-field w-full"
-						onkeydown={handleKeydown}
-					/>
-				</div>
-				
 				<div class="relative">
 					<label class="block text-sm font-medium text-slate-300 mb-1">Item</label>
 					<input
@@ -113,7 +101,9 @@
 						bind:value={formData.item}
 						class="input-field w-full"
 						placeholder="Digite para buscar..."
+						oninput={() => {}}
 						onkeydown={handleKeydown}
+						onblur={() => filteredItems = []}
 					/>
 					
 					{#if filteredItems.length > 0 && formData.item}
@@ -122,13 +112,36 @@
 								<button
 									type="button"
 									onclick={() => selectItem(item)}
-									class="w-full text-left px-3 py-2 hover:bg-slate-700 transition-colors text-sm"
+									class="w-full text-left px-3 py-2 hover:bg-slate-700 transition-colors text-sm flex justify-between items-center"
 								>
-									{item.nome_item}
+									<span class="text-white">{item.nome_item}</span>
+									<span class="text-xs text-slate-400">{item.nome_categoria} / {item.nome_subcategoria}</span>
 								</button>
 							{/each}
 						</div>
 					{/if}
+				</div>
+				
+				<div>
+					<label class="block text-sm font-medium text-slate-300 mb-1">Categoria</label>
+					<input
+						type="text"
+						value={selectedItem?.nome_categoria || ''}
+						readonly
+						class="input-field w-full bg-slate-700 border-slate-600 text-slate-400"
+						placeholder="Selecione um item"
+					/>
+				</div>
+				
+				<div>
+					<label class="block text-sm font-medium text-slate-300 mb-1">Subcategoria</label>
+					<input
+						type="text"
+						value={selectedItem?.nome_subcategoria || ''}
+						readonly
+						class="input-field w-full bg-slate-700 border-slate-600 text-slate-400"
+						placeholder="Selecione um item"
+					/>
 				</div>
 				
 				<div>
@@ -144,29 +157,10 @@
 				</div>
 				
 				<div>
-					<label class="block text-sm font-medium text-slate-300 mb-1">Parcelas</label>
-					<select bind:value={formData.parcelas} class="input-field w-full">
-						{#each Array(12) as _, i}
-							<option value={i + 1}>{i + 1}</option>
-						{/each}
-					</select>
-				</div>
-				
-				<div>
 					<label class="block text-sm font-medium text-slate-300 mb-1">Tipo</label>
 					<select bind:value={formData.tipo} class="input-field w-full">
 						<option value="variável">Variável</option>
 						<option value="fixo">Fixo</option>
-					</select>
-				</div>
-				
-				<div>
-					<label class="block text-sm font-medium text-slate-300 mb-1">Pagamento</label>
-					<select bind:value={formData.pagamento} class="input-field w-full">
-						<option value="Credito">Crédito</option>
-						<option value="Debito">Débito</option>
-						<option value="Dinheiro">Dinheiro</option>
-						<option value="Pix">Pix</option>
 					</select>
 				</div>
 				
@@ -179,6 +173,22 @@
 						placeholder="Observações (opcional)"
 					></textarea>
 				</div>
+				
+				{#if selectedItem}
+					<div class="md:col-span-2 p-3 bg-slate-800 rounded-lg">
+						<p class="text-sm text-slate-300">
+							<strong>Categoria:</strong> {selectedItem.nome_categoria}<br>
+							<strong>Subcategoria:</strong> {selectedItem.nome_subcategoria}
+						</p>
+					</div>
+				{:else if gasto?.categoria}
+					<div class="md:col-span-2 p-3 bg-slate-800 rounded-lg">
+						<p class="text-sm text-slate-300">
+							<strong>Categoria:</strong> {gasto.categoria}<br>
+							<strong>Subcategoria:</strong> {gasto.subcategoria}
+						</p>
+					</div>
+				{/if}
 			</div>
 		</div>
 		

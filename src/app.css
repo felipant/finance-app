@@ -1,25 +1,28 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  /* O Tailwind v4 mapeia variáveis CSS automaticamente para classes utility */
-  /* Aqui definimos a cor 'border' que está faltando */
-  --color-border: var(--border); 
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-50;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
   
-  /* Se você estiver usando o sistema de cores do shadcn, 
-     precisa definir as variáveis do sistema dark/light também */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-/* Exemplo de definição das variáveis (estilo shadcn dark mode) */
-:root {
-  --background: #020617; /* Slate 950 */
-  --foreground: #f8fafc;
-  --border: #1e293b;     /* Slate 800 (suas linhas brancas com opacidade) */
-}
-
-.dark {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --border: #1e293b;
+  .btn-secondary {
+    @apply bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+  }
+  
+  .input-field {
+    @apply bg-slate-800 border border-slate-600 text-white placeholder-slate-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+  
+  .card {
+    @apply bg-slate-900 border border-slate-700 rounded-lg p-6;
+  }
 }

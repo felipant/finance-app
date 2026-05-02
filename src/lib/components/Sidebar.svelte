@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Home, Database, DollarSign, BarChart3, PieChart, Settings } from 'lucide-svelte';
+	import { Home, Database, DollarSign, BarChart3, PieChart, LucideMinus } from 'lucide-svelte';
 	
 	let isCollapsed = $state(false);
 	
@@ -25,7 +25,7 @@
 			onclick={toggleSidebar}
 			class="w-full flex items-center justify-center p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
 		>
-			<Settings class="w-5 h-5 text-white" />
+			<LucideMinus class="w-5 h-5 text-white" />
 		</button>
 	</div>
 	

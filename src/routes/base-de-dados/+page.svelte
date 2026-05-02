@@ -6,7 +6,7 @@
 	let { data } = $props();
 	
 	let gastos = $state(data.gastos || []);
-	let filteredGastos = $state([]);
+	//let filteredGastos = $state([]);
 	let showEditModal = $state(false);
 	let editingGasto = $state(null);
 	let notifications = $state([]);

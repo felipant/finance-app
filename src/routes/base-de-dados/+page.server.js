@@ -33,7 +33,7 @@ export async function load({ platform }) {
 					ELSE 'Outro'
 				END as pagamento
 			FROM gastos g
-			LEFT JOIN itens i ON g.id_categoria = i.id_subcategoria
+			LEFT JOIN itens i ON g.id_item = i.id
 			LEFT JOIN subcategorias s ON g.id_subcategoria = s.id
 			LEFT JOIN categorias c ON g.id_categoria = c.id
 			LEFT JOIN pagamento p ON g.id_pagamento = p.id

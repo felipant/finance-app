@@ -52,9 +52,9 @@
 	
 	function selectItem(rowIndex, item) {
 		rows[rowIndex].item = item.nome_item;
-		rows[rowIndex].categoria = item.categoria;
-		rows[rowIndex].subcategoria = item.subcategoria;
-		filteredItems = [];
+		rows[rowIndex].categoria = item.nome_categoria;
+		rows[rowIndex].subcategoria = item.nome_subcategoria;
+		currentFocusIndex = -1;
 		
 		// Focus on valor field
 		const valorInput = document.querySelector(`#valor-${rowIndex}`);
@@ -224,19 +224,21 @@
 											bind:value={row.item}
 											oninput={(e) => handleItemInput(rowIndex, e.target.value)}
 											onkeydown={(e) => handleKeyDown(e, rowIndex, 'item')}
+											onblur={() => { setTimeout(() => { currentFocusIndex = -1; }, 200); }}
 											class="input-field w-full text-sm"
 											placeholder="Digite para buscar..."
 										/>
 										
 										{#if filteredItems.length > 0 && currentFocusIndex === rowIndex && row.item}
-											<div class="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg">
+											<div class="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg max-h-40 overflow-y-auto">
 												{#each filteredItems as item}
 													<button
 														type="button"
 														onclick={() => selectItem(rowIndex, item)}
-														class="w-full text-left px-3 py-2 hover:bg-slate-700 transition-colors text-sm"
+														class="w-full text-left px-3 py-2 hover:bg-slate-700 transition-colors text-sm flex justify-between items-center"
 													>
-														{item.nome_item}
+														<span>{item.nome_item}</span>
+														<span class="text-xs text-slate-400">{item.nome_categoria} / {item.nome_subcategoria}</span>
 													</button>
 												{/each}
 											</div>

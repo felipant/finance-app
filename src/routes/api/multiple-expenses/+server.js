@@ -12,10 +12,14 @@ export async function POST({ request, platform }) {
 		
 		// Get payment method ID
 		const paymentResult = await db.prepare(`
-			SELECT id FROM pagamento WHERE ? IS NOT NULL
-		`).bind(header.pagamento).first();
+			SELECT id FROM pagamento WHERE ${header.pagamento} IS NOT NULL
+		`).first();
 		
-		const paymentId = paymentResult?.id || 1;
+		if (!paymentResult) {
+			return json({ error: 'Método de pagamento não encontrado' }, { status: 400 });
+		}
+		
+		const paymentId = paymentResult.id;
 		
 		// Process each item
 		const results = [];
@@ -24,24 +28,36 @@ export async function POST({ request, platform }) {
 			
 			// Get item details
 			const itemResult = await db.prepare(`
-				SELECT i.id_subcategoria, s.id_categoria
+				SELECT i.id as item_id, i.id_subcategoria, s.id_categoria
 				FROM itens i
 				JOIN subcategorias s ON i.id_subcategoria = s.id
 				WHERE i.nome_item = ?
 			`).bind(item.item).first();
 			
-			if (!itemResult) continue;
+			if (!itemResult) {
+				console.log('Item not found:', item.item);
+				continue;
+			}
+			
+			// Validate all foreign keys before insertion
+			console.log('Inserting expense with foreign keys:', {
+				id_item: itemResult.item_id,
+				id_categoria: itemResult.id_categoria,
+				id_subcategoria: itemResult.id_subcategoria,
+				id_pagamento: paymentId
+			});
 			
 			// Insert expense
 			const result = await db.prepare(`
 				INSERT INTO gastos (
-					data_compra, valor, parcelas, id_categoria, id_subcategoria,
+					data_compra, valor, parcelas, id_item, id_categoria, id_subcategoria,
 					tipo, id_pagamento, comentario
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 			`).bind(
 				header.data_compra,
 				parseFloat(item.valor),
 				parseInt(header.parcelas),
+				itemResult.item_id,
 				itemResult.id_categoria,
 				itemResult.id_subcategoria,
 				header.tipo,
