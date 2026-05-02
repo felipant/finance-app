@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  /* O Tailwind v4 mapeia variáveis CSS automaticamente para classes utility */
+  /* Aqui definimos a cor 'border' que está faltando */
+  --color-border: var(--border); 
+  
+  /* Se você estiver usando o sistema de cores do shadcn, 
+     precisa definir as variáveis do sistema dark/light também */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+/* Exemplo de definição das variáveis (estilo shadcn dark mode) */
+:root {
+  --background: #020617; /* Slate 950 */
+  --foreground: #f8fafc;
+  --border: #1e293b;     /* Slate 800 (suas linhas brancas com opacidade) */
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --border: #1e293b;
+}
